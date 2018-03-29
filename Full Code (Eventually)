@@ -1,3 +1,10 @@
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+// twelve servo objects can be created on most boards
+
+int pos = 0;    // variable to store the servo position
+
 char state = 0;            //Variable for storing received data
 int STBY = 2; //standby
 
@@ -12,6 +19,12 @@ int BI1 = 12; //Direction
 int BI2 = 13; //Direction
 
 void setup() {
+
+  myservo.attach(10);  // attaches the servo on pin 9 to the servo object
+  Serial.begin(9600);
+
+while (!Serial);
+
  pinMode(STBY, OUTPUT);
 
 pinMode(PWMA, OUTPUT);
@@ -24,6 +37,7 @@ pinMode(BI2, OUTPUT);
 
 while (!Serial);
 
+Serial.println("45 degree increments of movement for servo (A,B,C, D)");
 Serial.println("/For motor A 1 = slow foward, 2 fast foward, 5, 6 same, 0 to stop");
 Serial.println("/For motor B 3 = slow foward, 4 fast foward, 7, 8 same, 9 to stop");
 }
@@ -35,6 +49,38 @@ void loop() {
 state = Serial.read();        //Read the incoming data & store into data
       Serial.print(state);          //Print Value inside data in Serial monitor
       Serial.print("\n");        
+
+if (state=='A'){
+  pos = 180;
+myservo.write (pos);
+Serial.println("180");
+delay (20);
+  }
+  if (state==90){
+  pos = 90;
+myservo.write (pos);
+Serial.println("90");
+delay (20);
+  }
+
+  if (state=='B'){
+  pos = 0;
+myservo.write (pos);
+Serial.println("0");
+delay (20);
+  }
+    if (state=='C'){
+  pos = 45;
+myservo.write (pos);
+Serial.println("45");
+delay (20);
+  }
+  if (state=='D'){
+  pos = 135;
+myservo.write (pos);
+Serial.println("135");
+delay (20);
+  }
 if (state=='1'){
   move(1, 128, 1);
   }
