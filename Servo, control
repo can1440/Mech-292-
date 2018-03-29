@@ -1,0 +1,60 @@
+
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+// twelve servo objects can be created on most boards
+
+int pos = 0;    // variable to store the servo position
+
+void setup() {
+  myservo.attach(10);  // attaches the servo on pin 9 to the servo object
+  Serial.begin(9600);
+
+while (!Serial);
+
+Serial.println("45 degree increments of movement for servo");
+}
+
+void loop() {
+  if (Serial.available())
+
+{
+
+int state = Serial.parseInt();
+
+if (state==180){
+  pos = 180;
+myservo.write (pos);
+Serial.println("180");
+delay (20);
+  }
+  if (state==90){
+  pos = 90;
+myservo.write (pos);
+Serial.println("90");
+delay (20);
+  }
+
+  if (state==0){
+  pos = 0;
+myservo.write (pos);
+Serial.println("0");
+delay (20);
+  }
+    if (state==45){
+  pos = 45;
+myservo.write (pos);
+Serial.println("45");
+delay (20);
+  }
+  if (state==135){
+  pos = 135;
+myservo.write (pos);
+Serial.println("135");
+delay (20);
+  }
+
+
+
+}
+}
