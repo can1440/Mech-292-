@@ -51,7 +51,7 @@ state = Serial.read();        //Read the incoming data & store into data
       Serial.print("\n");        
 
   if (state=='e'){
-  pos = 90;
+  pos = 80;
 myservo.write (pos);
 Serial.println("75");
 delay (20);
@@ -68,6 +68,13 @@ if (state=='1'){
 if  (state=='2'){
   move(2, 255, 2);
   }
+  if (state=='3'){
+  move(1, 255, 2);
+  }
+   if (state=='4'){
+  move(2, 255, 1);
+  }
+  
   if (state=='0'){
   move(1, 0, 1);
   }
