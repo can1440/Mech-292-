@@ -50,63 +50,26 @@ state = Serial.read();        //Read the incoming data & store into data
       Serial.print(state);          //Print Value inside data in Serial monitor
       Serial.print("\n");        
 
-if (state=='A'){
-  pos = 180;
-myservo.write (pos);
-Serial.println("180");
-delay (20);
-  }
-  if (state==90){
+  if (state=='e'){
   pos = 90;
 myservo.write (pos);
-Serial.println("90");
+Serial.println("75");
 delay (20);
   }
-
-  if (state=='B'){
-  pos = 0;
-myservo.write (pos);
-Serial.println("0");
-delay (20);
-  }
-    if (state=='C'){
-  pos = 45;
-myservo.write (pos);
-Serial.println("45");
-delay (20);
-  }
-  if (state=='D'){
+  if (state=='d'){
   pos = 135;
 myservo.write (pos);
 Serial.println("135");
 delay (20);
   }
 if (state=='1'){
-  move(1, 128, 1);
-  }
-if  (state=='2'){
   move(1, 255, 1);
   }
-  if (state=='5'){
-  move(1, 128, '2');
-  }
-   if (state=='6'){
-  move(1, 255, '2');
+if  (state=='2'){
+  move(2, 255, 2);
   }
   if (state=='0'){
   move(1, 0, 1);
-  }
-  if (state=='3'){
-  move(2, 128, 1);
-  }
-if  (state=='4'){
-  move(2, 255, 1);
-  }
-  if (state=='7'){
-  move(2, 128, '2');
-  }
-   if (state=='8'){
-  move(2, 255, '2');
   }
   if (state=='9'){
   move(2, 0, 1);
