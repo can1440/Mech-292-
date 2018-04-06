@@ -1,121 +1,213 @@
-#include <Servo.h>
+/* RC_Bluetooth_2018_v6
+ * By:    Khamlek HOMSOMBATH
+ * Date:  Jan 17, 2018
+ * Download Controller for Android : https://play.google.com/store/apps/details?id=com.lekpkd.duinojoy
+ */
+ #include <Servo.h>
 
-Servo myservo;  // create servo object to control a servo
+Servo myservo; 
+Servo rotation;
+// create servo object to control a servo
 // twelve servo objects can be created on most boards
 
-int pos = 0;    // variable to store the servo position
+int pos = 0;  // variable to store the servo position
+int rot = 0;
+int trigPin = 6;    //Trig - green Jumper
+int echoPin = 4;    //Echo - yellow Jumper
+long duration, cm, inches, Average_cm, Average_in;
+#include <SoftwareSerial.h>
 
-char state = 0;            //Variable for storing received data
-int STBY = 2; //standby
-
-//Motor A
-int PWMA = 3; //Speed control
-int AI1 = 8; //Direction
-int AI2 = 7; //Direction
-
-//Motor B
-int PWMB = 5; //Speed control
-int BI1 = 12; //Direction
-int BI2 = 13; //Direction
+// arduino>>bluetooth
+// D10 (as RX)   >>>  Tx
+// D11 (as TX)  >>>  Rx
+SoftwareSerial bluetooth(0, 1); // RX, TX
+#define PWMA 3
+#define AIN2 7
+#define AIN1 8
+#define STBY 2
+#define BIN1 12
+#define BIN2 13
+#define PWMB 5
 
 void setup() {
+    myservo.attach(10);
+    rotation.attach(11);
+  Serial.begin(9600); 
+  bluetooth.begin(9600);
+  
+  Serial.begin (9600);
+  //Define inputs and outputs
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  
+  pinMode(PWMA,OUTPUT); // PWM A
+  pinMode(PWMB,OUTPUT); // PWM B
+  pinMode(BIN1,OUTPUT); // B
+  pinMode(BIN2,OUTPUT); // B
+  pinMode(AIN1,OUTPUT); // A
+  pinMode(AIN2,OUTPUT); // A
+  pinMode(STBY,OUTPUT); // STBY
 
-  myservo.attach(10);  // attaches the servo on pin 9 to the servo object
-  Serial.begin(9600);
+  digitalWrite(STBY,1);
 
-while (!Serial);
-
- pinMode(STBY, OUTPUT);
-
-pinMode(PWMA, OUTPUT);
-pinMode(AI1, OUTPUT);
-pinMode(AI2, OUTPUT);
-pinMode(PWMB, OUTPUT);
-pinMode(BI1, OUTPUT);
-pinMode(BI2, OUTPUT);
- Serial.begin(9600);
-
-while (!Serial);
-
-Serial.println("45 degree increments of movement for servo (A,B,C, D)");
-Serial.println("/For motor A 1 = slow foward, 2 fast foward, 5, 6 same, 0 to stop");
-Serial.println("/For motor B 3 = slow foward, 4 fast foward, 7, 8 same, 9 to stop");
+  analogWrite(PWMA, 0);
+  analogWrite(PWMB, 0);
 }
 
+String data = "";
 void loop() {
-  if (Serial.available())
+  
+ // digitalWrite(trigPin, LOW);
+//  delayMicroseconds(5);
+//  digitalWrite(trigPin, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(trigPin, LOW);
+ 
+  // Read the signal from the sensor: a HIGH pulse whose
+  // duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+//  pinMode(echoPin, INPUT);
+//  duration = pulseIn(echoPin, HIGH);
+ 
+  // convert the time into a distance
+//  cm = (duration/2) / 29.1;
+//  inches = (duration/2) / 74; 
+  
+//  Serial.print(inches);
+//  Serial.print("in, ");
+//  Serial.print(cm);
+//  Serial.print("cm");
+//  Serial.println();
+  
+//  delay(250);
+  while(bluetooth.available()){
+    char a = bluetooth.read();
+    if(a==')') {
+      setData(data);
+      data = "";
+      return;
+    }
+    data += a;
+  }
+}
 
-{
-state = Serial.read();        //Read the incoming data & store into data
-      Serial.print(state);          //Print Value inside data in Serial monitor
-      Serial.print("\n");        
+int ledVal = 0;
+void setData(String data){
+  data.trim();
 
-  if (state=='e'){
-  pos = 80;
-myservo.write (pos);
-Serial.println("75");
+  int index = data.indexOf(",");                          //driving
+  if(index != -1){
+    int angle = data.substring(0,index).toInt();
+    int strength = data.substring(index + 1).toInt();
+
+    digitalWrite(BIN1,0);
+    digitalWrite(BIN2,0);
+    digitalWrite(AIN1,0);
+    digitalWrite(AIN2,0);
+    if (angle < 180){
+      digitalWrite(BIN1,1);
+      digitalWrite(AIN1,1);
+
+      if(angle < 90){
+        analogWrite(PWMA, strength * 255 / 100);
+        analogWrite(PWMB, strength * (angle * 255 / 90) / 100);
+      }else if(angle > 90){
+        analogWrite(PWMA, strength * ((180 - angle) * 255 / 90) / 100);
+        analogWrite(PWMB, strength * 255 / 100);
+      }else{
+        analogWrite(PWMA, strength * 255 / 100);
+        analogWrite(PWMB, strength * 255 / 100);
+      }
+    }else if(angle > 180){
+      digitalWrite(BIN2,1);
+      digitalWrite(AIN2,1);
+      
+      if(angle > 270){
+        analogWrite(PWMA, strength * 255 / 100);
+        analogWrite(PWMB, strength * ((360 - angle) * 255 / 90) / 100);
+      }else if(angle < 270){
+        analogWrite(PWMA, strength * ((90 - (270 - angle)) * 255 / 90) / 100);
+        analogWrite(PWMB, strength * 255 / 100);
+      }else{
+        analogWrite(PWMA, strength * 255 / 100);
+        analogWrite(PWMB, strength * 255 / 100);
+      }
+    }
+    return;
+  }
+
+  if(data.equals("a")){
+   pos = 135;
+   myservo.write (pos);
+Serial.print("135");
 delay (20);
-  }
-  if (state=='d'){
-  pos = 135;
-myservo.write (pos);
-Serial.println("135");
-delay (20);
-  }
-if (state=='1'){
-  move(1, 255, 1);
-  }
-if  (state=='2'){
-  move(2, 255, 2);
-  }
-  if (state=='3'){
-  move(1, 255, 2);
-  }
-   if (state=='4'){
-  move(2, 255, 1);
+return;
   }
   
-  if (state=='0'){
-  move(1, 0, 1);
+  if(data.equals("b")){
+   pos = 90;
+   myservo.write (pos);
+//Serial.println("10");
+delay (20);
+return;
   }
-  if (state=='9'){
-  move(2, 0, 1);
+
+if(data.equals("x")){
+rot = rot-20;
+rotation.write (rot);
+Serial.println("25");
+delay (20);
+return;
+ }
+  
+  if(data.equals("y")){
+   rot = 180;
+   rotation.write (rot);
+Serial.println("180");
+delay (20);
+return;
+  }
+   
+  if(data.equals("z")){
+   int i=0;
+   while (i<10){
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(5);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+ 
+  // Read the signal from the sensor: a HIGH pulse whose
+  // duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+ 
+  // convert the time into a distance
+  cm = cm + (duration/2) / 29.1;
+  inches = inches + (duration/2) / 74; 
+  
+  Serial.println(i);
+  ++i;
+   }
+
+Average_cm = cm/10;
+Average_in = inches/10;
+  
+  Serial.print("in: ");
+  Serial.println(Average_in);
+  Serial.print('\n');
+  Serial.print("cm:");
+  Serial.println(Average_cm);
+  Serial.print ('\n');
+
+
+  
+  delay(250);
+return;
   }
   
-}
-}
-void move(int motor, int speed, int direction){
-//Move specific motor at speed and direction
-//motor: 0 for B 1 for A
-//speed: 0 is off, and 255 is full speed
-//direction: 0 clockwise, 1 counter-clockwise
-
-digitalWrite(STBY, HIGH); //disable standby
-
-boolean inPin1 = LOW;
-boolean inPin2 = HIGH;
-
-if(direction == 1){
-inPin1 = HIGH;
-inPin2 = LOW;
-}
-if(direction == 2){
-inPin1 = LOW;
-inPin2 = HIGH;
-}
-if(direction == 3){
-inPin1 = LOW;
-inPin2 = LOW;
-}
-
-if(motor == 1){
-digitalWrite(AI1, inPin1);
-digitalWrite(AI2, inPin2);
-analogWrite(PWMA, speed);
-}
-if(motor == 2){
-digitalWrite(BI1, inPin1);
-digitalWrite(BI2, inPin2);
-analogWrite(PWMB, speed);
-}
+  
+  Serial.print("Recieved: ");
+  Serial.println(data);
 }
